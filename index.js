@@ -115,7 +115,7 @@ export default async function fetchData(selectedDate) {
         // Filter files based on the selected date
         const filteredFiles = processedFiles.filter(file => {
             // Compare the date in file.keyvalues.date with selectedDate
-            return new Date(file.keyvalues.date) < new Date(selectedDate);
+            return new Date(file.keyvalues.date) <= new Date(selectedDate);
         });
 
         console.log(filteredFiles); // Output the filtered files
