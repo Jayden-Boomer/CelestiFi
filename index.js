@@ -90,9 +90,23 @@ export default async function fetchData(selectedDate) {
         // Fetch all files
         const response = await pinata.files.list(); 
         const allFiles = response.files;
+        
+        const processedFiles = allFiles.map(file => {
+            // Check if keyvalues exists, if not create it
+            if (!file.keyvalues) {
+                file.keyvalues = {}; // Initialize keyvalues as an empty object
+            }
+            
+            // Ensure the date key is set in keyvalues
+            if (!file.keyvalues.date) {
+                file.keyvalues.date = new Date(file.created_at); // Set the date in ISO format
+            }
+    
+            return file; // Return the modified file object
+        });
 
         // Filter files based on the selected date
-        const filteredFiles = allFiles.filter(file => {
+        const filteredFiles = processedFiles.filter(file => {
             // Compare the date in file.keyvalues.date with selectedDate
             return new Date(file.keyvalues.date) < new Date(selectedDate);
         });
