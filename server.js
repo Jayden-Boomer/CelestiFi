@@ -32,24 +32,10 @@ app.post('/submit-date', async (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
 
 
-function renderFiles(files) {
-  const resultsContainer = document.getElementById('response');
-  resultsContainer.innerHTML = ''; // Clear previous results
-  if (files.length === 0) {
-      resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
-      return;
-  }
-  files.forEach(file => {
-      const fileElement = document.createElement('div');
-      fileElement.classList.add('file-item');
-      fileElement.textContent = 'Name: ' + file.name + ', Date: '+ new Date(file.keyvalues.date).toLocaleString() +', Size:'+ file.size + ' bytes';
-      resultsContainer.appendChild(fileElement);
-  });
-}
 
 //3691
 /**

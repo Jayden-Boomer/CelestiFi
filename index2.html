@@ -116,12 +116,24 @@
             resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
             return;
         }
+        
         files.forEach(file => {
             const fileElement = document.createElement('div');
             fileElement.classList.add('file-item');
-            fileElement.textContent = 'Name: ' + file.name + ', Date: '+ new Date(file.keyvalues.date).toLocaleString() +', Size:'+ file.size + ' bytes';
+            fileElement.textContent = 'Name:  ' + file.name + ', Date:  '+ formatDate(file.keyvalues.date) +', Size:  '+ formatFileSize(file.size);
             resultsContainer.appendChild(fileElement);
         });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function formatDate(date) {
+        return new Date(date).toLocaleString().split(',')[0]
     }
   </script>
 </body>
