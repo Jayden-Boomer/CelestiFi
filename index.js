@@ -1,22 +1,32 @@
-const { PinataSDK } = require("pinata")
-const fs = require("fs")
-const { Blob } = require("buffer")
-require("dotenv").config()
+import { PinataSDK } from "pinata";
+//import 'dotenv/config';
+// import * as dotenv from "dotenv"
+// dotenv.config();
+
+// Access the environment variables
+const PINATA_JWT = "";
+const GATEWAY_URL = "";
+
+// console.log('JWT:', jwt);
+// console.log('Gateway URL:', gateway);
 
 const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.GATEWAY_URL
-})
+  pinataJwt: PINATA_JWT,
+  //process.env.PINATA_JWT,
+  pinataGateway: GATEWAY_URL,
+  //process.env.GATEWAY_URL,
+});
+// console.log('Pinata initialized with JWT:', jwt);
 
-async function upload(){
+
+async function main() {
   try {
-    const blob = new Blob([fs.readFileSync("./hello-world.txt")]);
-    const file = new File([blob], "hello-world.txt", { type: "text/plain"})
+    const file = new File(["Hello World"], "hello-world.txt", { type: "text/plain" });
     const upload = await pinata.upload.file(file);
-    console.log(upload)
+    console.log(upload);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
-upload()
+await main();
