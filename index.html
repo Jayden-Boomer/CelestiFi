@@ -4,14 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date Filter for Files</title>
+    <script src="index.js"></script>
     <style>
+         body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+
+    form {
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      max-width: 300px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        #dateForm {
+        /* #dateForm {
             margin-bottom: 20px;
-        }
+        } */
         #results {
             border: 1px solid #ccc;
             padding: 10px;
@@ -34,7 +74,7 @@
     <form id="dateForm">
         <label for="fileDate">Select a date:</label>
         <input type="date" id="fileDate" name="fileDate" required />
-        <button type="submit">Search</button>
+        <button type="submit">Search</button><!--submit="await loadFiles()" -->
     </form>
 
     <div id="results"></div>
@@ -44,48 +84,68 @@
         // // Sample array of file objects with dates
         var files = [
             {
-                id: '0193380b-d004-72d5-81d7-dfcaa48192d4',
-                name: 'testing.txt',
-                cid: 'bafkreig44fcmvn4s3gbbqyhjhhp4c5tldda4sxksdsxqcg3rhmzqzq4ms4',
-                size: 45,
+                id: '019339b3-60cc-70b7-b956-4f0e50576571',
+                name: 'File 1.txt',
+                cid: 'bafkreieecsmyvyy2e3x4guleyxkkswcyapli7zqeu342mkkngtqwhok2qy',
+                size: 51,
                 number_of_files: 1,
                 mime_type: 'text/plain',
                 group_id: '019337ce-c27f-785e-800a-a845d816e56e',
-                keyvalues: { date: '11/16/2024', foo: 'bar' },
-                created_at: '2024-11-17T02:55:19.292897Z'
+                keyvalues: { date: '2023-01-01T00:00:00.000Z', time: ' 4:37:55 AM' },
+                created_at: '2024-11-17T10:37:58.05501Z'
             },
             {
-                id: '01933808-884d-7b40-9f81-e122439d2fb0',
-                name: 'testing.txt',
-                cid: 'bafkreidifwaxkxnbz734weybxzyaezbq37finc4izwttyccw7tegkrm7ay',
-                size: 46,
+                id: '019339b3-60ca-73f8-bd88-705c7559d535',
+                name: 'File 2.txt',
+                cid: 'bafkreigksosrfjc66xaqampkedmtcjrmramgmmuqtpi6z6yapfa7eahh7q',
+                size: 51,
                 number_of_files: 1,
                 mime_type: 'text/plain',
                 group_id: '019337ce-c27f-785e-800a-a845d816e56e',
-                keyvalues: { date: '11/16/2024' },
-                created_at: '2024-11-17T02:51:44.271484Z'
+                keyvalues: { date: '2023-02-01T00:00:00.000Z', time: ' 4:37:55 AM' },
+                created_at: '2024-11-17T10:37:57.921514Z'
+            },
+            {
+                id: '019339b3-60af-7c24-932b-388adabfe8c6',
+                name: 'File 3.txt',
+                cid: 'bafkreiaevquva4o5swvgw7ohvmzqrvavrncd2ldf66npdltmcanyribmpy',
+                size: 51,
+                number_of_files: 1,
+                mime_type: 'text/plain',
+                group_id: '019337ce-c27f-785e-800a-a845d816e56e',
+                keyvalues: { date: '2023-03-01T00:00:00.000Z', time: ' 4:37:55 AM' },
+                created_at: '2024-11-17T10:37:57.957411Z'
+            },
+            {
+                id: '01933801-c72c-7775-bbed-80c028d36888',
+                name: 'testing.txt',
+                cid: 'bafkreigvpwmfgdjq5ylsxyxjw33nkg7vkvx3lyiqwmughijojedr3sbyie',
+                size: 37,
+                number_of_files: 1,
+                mime_type: 'text/plain',
+                group_id: '019337ce-c27f-785e-800a-a845d816e56e',
+                keyvalues: { date: '2024-11-17T02:44:20.138Z' },
+                created_at: '2024-11-17T02:44:21.629655Z'
             }
         ];
-        //     { name: 'File 1', date: new Date('2023-01-01') },
-        //     { name: 'File 2', date: new Date('2023-02-01') },
-        //     { name: 'File 3', date: new Date('2023-03-01') },
-        // ];
-        // document.getElementById('dateForm').addEventListener('change', function(event) {
-        //     event.preventDefault();
-        //     files = getFiles();
-        //     console.log(files)
-        // });
+        
+        // async function loadFiles() {
+        //     files = await getFiles();
+        //     console.log("Files:" + files)
+        //     // const selectedDate = new Date(document.getElementById('fileDate').value);
+        //     // displayFiles(selectedDate);
+        // }
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();
             // files.concat(getFiles());
-            console.log("Files:" + files)
+            // console.log("Files:" + files)
             const selectedDate = new Date(document.getElementById('fileDate').value);
             displayFiles(selectedDate);
         });
 
         function displayFiles(selectedDate) {
-            const filteredFiles = files.filter(file => file.date <= selectedDate);
+            const filteredFiles = files.filter(file => new Date(file.keyvalues.date) < selectedDate);
             renderFiles(filteredFiles);
         }
 
@@ -99,7 +159,7 @@
             files.forEach(file => {
                 const fileElement = document.createElement('div');
                 fileElement.classList.add('file-item');
-                fileElement.textContent = file.name;
+                fileElement.textContent = 'Name: ' + file.name + ', Date: '+ new Date(file.keyvalues.date).toLocaleString() +', Size:'+ file.size + ' bytes';
                 resultsContainer.appendChild(fileElement);
             });
         }

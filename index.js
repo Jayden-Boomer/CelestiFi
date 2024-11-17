@@ -39,6 +39,27 @@ async function upload(file, groupId) {
 }
 
 
+async function uploadFake(file, groupId, date) {
+  try {
+    const groups = await pinata.groups.list()
+    const group = groups.groups[0].id
+    const dateStrings  = new Date().toLocaleString().split(',')
+    const time = dateStrings[1]
+    const upload = await pinata.upload.file(file).group(group).addMetadata({
+      keyvalues: {
+        "date": new Date(date),
+        "time": time
+      },
+    })
+    // console.log(new Date().toISOString())
+    console.log(upload);
+    return upload;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 async function fetchFileByName(fileName) {
   try {
     // List files with the specified name filter
@@ -64,9 +85,9 @@ async function fetch() {
   try {
     const groups = await pinata.groups.list()
     const group = groups.groups[0].id
-    const files = await pinata.files.list().group(group).metadata({
-      "date": "11/16/2024"
-    })    
+    const files = await pinata.files.list()//.group(group).metadata({
+    //   "date": "11/16/2024"
+    // })    
     console.log(files.files)
     // const date = new Date(files.files[0].created_at)
     // console.log(date.toLocaleString())
@@ -79,7 +100,7 @@ async function fetch() {
   }
 }
 
-export async function getFiles() {
+async function getFiles() {
     // Example of fetching files (this could be from a database, API, etc.)
     return [
         { name: 'File 1', date: new Date('2023-01-01') },
@@ -88,7 +109,14 @@ export async function getFiles() {
         // Add more files as needed
     ];
 }
-
-// await upload(file);
+async function uploadFakes(){
+  const array = await getFiles()
+  array.forEach(element => {
+    const newfile = new File(["ever since i was a jit kdfl;sfdafkfsfhfghfgfh" + element.name], element.name+".txt", { type: "text/plain" });
+    uploadFake(newfile, 0, element.date);
+  });
+}
+// await uploadFakes();
+// await upload(file, 0, new Date);
 await fetch();
 // await fetchFileByName("Leave You Alone [Untitled_NFT].mp3")
