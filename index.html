@@ -40,9 +40,32 @@
     <div id="results"></div>
 
     <script>
-        import {getFiles} from './index.js'
+        // import {getFiles} from './index.js'
         // // Sample array of file objects with dates
-        var files = [];
+        var files = [
+            {
+                id: '0193380b-d004-72d5-81d7-dfcaa48192d4',
+                name: 'testing.txt',
+                cid: 'bafkreig44fcmvn4s3gbbqyhjhhp4c5tldda4sxksdsxqcg3rhmzqzq4ms4',
+                size: 45,
+                number_of_files: 1,
+                mime_type: 'text/plain',
+                group_id: '019337ce-c27f-785e-800a-a845d816e56e',
+                keyvalues: { date: '11/16/2024', foo: 'bar' },
+                created_at: '2024-11-17T02:55:19.292897Z'
+            },
+            {
+                id: '01933808-884d-7b40-9f81-e122439d2fb0',
+                name: 'testing.txt',
+                cid: 'bafkreidifwaxkxnbz734weybxzyaezbq37finc4izwttyccw7tegkrm7ay',
+                size: 46,
+                number_of_files: 1,
+                mime_type: 'text/plain',
+                group_id: '019337ce-c27f-785e-800a-a845d816e56e',
+                keyvalues: { date: '11/16/2024' },
+                created_at: '2024-11-17T02:51:44.271484Z'
+            }
+        ];
         //     { name: 'File 1', date: new Date('2023-01-01') },
         //     { name: 'File 2', date: new Date('2023-02-01') },
         //     { name: 'File 3', date: new Date('2023-03-01') },
@@ -55,7 +78,7 @@
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            files.concat(getFiles());
+            // files.concat(getFiles());
             console.log("Files:" + files)
             const selectedDate = new Date(document.getElementById('fileDate').value);
             displayFiles(selectedDate);

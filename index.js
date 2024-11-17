@@ -68,11 +68,11 @@ async function fetch() {
       "date": "11/16/2024"
     })    
     console.log(files.files)
-    const date = new Date(files.files[0].created_at)
-    console.log(date.toLocaleString())
-    console.log(new Date())
-    const data = await pinata.gateways.get(files.files[0].cid);
-    console.log(data)
+    // const date = new Date(files.files[0].created_at)
+    // console.log(date.toLocaleString())
+    // console.log(new Date())
+    // const data = await pinata.gateways.get(files.files[0].cid);
+    // console.log(data)
 
   } catch (error) {
     console.log(error);
@@ -90,5 +90,5 @@ export async function getFiles() {
 }
 
 // await upload(file);
-// await fetch();
+await fetch();
 // await fetchFileByName("Leave You Alone [Untitled_NFT].mp3")
