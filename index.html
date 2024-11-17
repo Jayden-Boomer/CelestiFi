@@ -26,7 +26,7 @@
             border-bottom: none;
         }
     </style>
-    <script src="index.js"></script>
+    <!-- <script src="index.js"></script> -->
 </head>
 <body>
 
@@ -55,7 +55,7 @@
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            files = getFiles();
+            files.concat(getFiles());
             console.log("Files:" + files)
             const selectedDate = new Date(document.getElementById('fileDate').value);
             displayFiles(selectedDate);
