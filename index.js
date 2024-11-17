@@ -105,6 +105,13 @@ export default async function fetchData(selectedDate) {
             return file; // Return the modified file object
         });
 
+        // Sort processed files by groupId
+        processedFiles.sort((a, b) => {
+            if (a.groupId < b.groupId) return -1; // a comes before b
+            if (a.groupId > b.groupId) return 1;  // a comes after b
+            return 0; // a and b are equal
+        });
+
         // Filter files based on the selected date
         const filteredFiles = processedFiles.filter(file => {
             // Compare the date in file.keyvalues.date with selectedDate
