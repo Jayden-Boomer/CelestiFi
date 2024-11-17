@@ -12,18 +12,19 @@
     }
 
     form {
-    display: flex;
-    flex-direction: column; /* Align items in a column */
-    align-items: center; /* Center items horizontally */
-    margin-top: 20px;
-    padding: 20px;
-    margin-right: 20px;
-    background: #15024c;
-    border: 1px solid #28126a;
-    border-radius: 5px;
-    max-width: 300px;
-    margin-left: auto; /* Center form horizontally */
-    margin-right: auto; /* Center form horizontally */
+        display: flex;
+        flex-direction: column; /* Align items in a column */
+        align-items: center; /* Center items horizontally */
+        margin-top: 20px;
+        padding: 20px;
+        margin-right: 20px;
+        background: #15024c;
+        border: 1px solid #28126a;
+        color: #eae0ff;
+        border-radius: 5px;
+        max-width: 300px;
+        margin-left: auto; /* Center form horizontally */
+        margin-right: auto; /* Center form horizontally */
     }
 
     h1 {
@@ -69,8 +70,10 @@
 <body>
   <h1 style="color:#eae0ff">CelestiFi</h1>
   <form id="dateForm" action="/submit-date" method="POST">
-    <label for="date">Select a date:</label>
+    <label for="dateSlider">Select a date:</label>
+    <input type="range" id="dateSlider" name="date" min="0" max="0" step="0" value="0">
     <input type="date" id="date" name="date" required>
+    <!-- <span id="selectedDate"></span> -->
     <br>
     <button type="submit">GO</button>
   </form>
@@ -81,32 +84,73 @@
   <script>
     const form = document.getElementById('dateForm');
     const responseDiv = document.getElementById('response');
+    const dateSlider = document.getElementById('dateSlider');
+    // const selectedDateDisplay = document.getElementById('selectedDate');
+    const dateInput = document.getElementById('date');
+
+    // Simulating the date of the first file from the database
+    const firstFileDate = new Date('12/31/2022'); // Example start date
+    const currentDate = new Date();
+
+    // Convert dates to timestamps
+    const minTimestamp = firstFileDate.getTime() - 1;
+    const maxTimestamp = currentDate.getTime() + 1;
+
+    // Set the slider attributes
+    dateSlider.min = minTimestamp;
+    dateSlider.max = maxTimestamp;
+    dateSlider.value = minTimestamp;
+    dateSlider.step = 1; // Set step to 1 for precise control
+
+    // Function to format the timestamp as a readable date
+    function formatDate(timestamp) {
+        const date = new Date(parseInt(timestamp));
+        return date.toLocaleDateString();
+    }
+
+    // Update the displayed date based on the slider value
+    function updateDateDisplay() {
+        const dateValue = new Date(parseInt(dateSlider.value)); // Convert slider value to date
+        // selectedDateDisplay.textContent = dateValue.toLocaleDateString(); // Display the date in a readable format
+        dateInput.value = dateValue.toISOString().split('T')[0]; // Update date input value
+    }
+
+    // Initialize the date display
+    updateDateDisplay();
+
+    // Event listener for slider input
+    dateSlider.addEventListener('input', updateDateDisplay);
+
+    // Event listener for date input change
+    dateInput.addEventListener('input', function() {
+        const selectedDate = new Date(dateInput.value); // Get the date from input
+        dateSlider.value = selectedDate.getTime(); // Update slider value
+        updateDateDisplay(); // Update the display
+    });
 
     form.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); // Prevent default form submission
 
-      const formData = new FormData(form);
-      const date = formData.get('date');
+        const selectedDate = new Date(parseInt(dateSlider.value)); // Get the selected date from the slider
 
-      try {
-        // Send form data to the server
-        const response = await fetch('/submit-date', {
-          method: 'POST',
-          body: new URLSearchParams(formData),
-        });
+        try {
+            // Send form data to the server
+            const response = await fetch('/submit-date', {
+                method: 'POST',
+                body: new URLSearchParams({ date: selectedDate.toISOString() }), // Send the date in ISO format
+            });
 
-        const files = await response.json(); // Get the server's response
-        console.log('Server response:', files);
+            const files = await response.json(); // Get the server's response
+            console.log('Server response:', files);
 
-        // Display the server's response in the #response div
-        responseDiv.style.display = 'block';
-        // Call the function to render files
-        renderFiles(files);
-      } catch (error) {
-        console.error('Error submitting the date:', error);
-        responseDiv.style.display = 'block';
-        responseDiv.textContent = 'There was an error submitting your date.';
-      }
+            // Display the server's response in the #response div
+            responseDiv.style.display = 'block';
+            renderFiles(files);
+        } catch (error) {
+            console.error('Error submitting the date:', error);
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'There was an error submitting your date.';
+        }
     });
 
     function renderFiles(files) {

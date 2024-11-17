@@ -126,15 +126,6 @@ export default async function fetchData(selectedDate) {
     }
 }
 
-async function getFiles() {
-    // Example of fetching files (this could be from a database, API, etc.)
-    return [
-        { name: 'File 1', date: new Date('2023-01-01') },
-        { name: 'File 2', date: new Date('2023-02-01') },
-        { name: 'File 3', date: new Date('2023-03-01') },
-        // Add more files as needed
-    ];
-}
 async function uploadFakes(){
   const array = await getFiles()
   array.forEach(element => {
