@@ -79,6 +79,19 @@ async function fetch() {
   }
 }
 
+
+// index.js
+
+export async function getFiles() {
+    // Example of fetching files (this could be from a database, API, etc.)
+    return [
+        { name: 'File 1', date: new Date('2023-01-01') },
+        { name: 'File 2', date: new Date('2023-02-01') },
+        { name: 'File 3', date: new Date('2023-03-01') },
+        // Add more files as needed
+    ];
+}
+
 await upload(file);
 await fetch();
-await fetchFileByName("CS_SE 2340 Term Project - Fall 2024 (1).pdf")
+await fetchFileByName("Leave You Alone [Untitled_NFT].mp3")

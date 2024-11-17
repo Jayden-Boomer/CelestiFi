@@ -26,6 +26,7 @@
             border-bottom: none;
         }
     </style>
+    <script src="index.js"></script>
 </head>
 <body>
 
@@ -39,14 +40,12 @@
     <div id="results"></div>
 
     <script>
-        // Sample array of file objects with dates
-        const files = [
-            { name: 'File1.txt', date: new Date('2023-10-01') },
-            { name: 'File2.txt', date: new Date('2023-10-05') },
-            { name: 'File3.txt', date: new Date('2023-10-10') },
-            { name: 'File4.txt', date: new Date('2023-10-15') },
-            { name: 'File5.txt', date: new Date('2023-10-20') }
-        ];
+        // // Sample array of file objects with dates
+        var files = [];
+        document.getElementById('dateForm').addEventListener('click', function(event) {
+            event.preventDefault();
+            files = getFiles();
+        });
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();

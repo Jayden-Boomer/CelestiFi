@@ -1,6 +1,5 @@
 //app.js
 
-
 import { createServer } from 'http'
 import * as fs from 'node:fs';
 
@@ -11,20 +10,42 @@ import * as fs from 'node:fs';
 
 const port = 8080;
 
-const server = createServer((req, res) => {
-    // Define the path to the HTML file
-    const filePath = "index.html"//path.join(__dirname, 'index.html');
+// Initialize the files variable
+let files = [];
 
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('500 Internal Server Error');
-            console.error('Error reading file:', err);
-            return;
-        }
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(data);
-    });
+// Load files when the server starts
+(async () => {
+    files = await getFiles();
+})();
+
+const server = createServer((req, res) => {
+    if (req.method === 'POST' && req.url === '/api/files-by-date') {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString(); // Convert Buffer to string
+        });
+        req.on('end', () => {
+            const { date } = JSON.parse(body);
+            const selectedDate = new Date(date);
+            const filteredFiles = files.filter(file => file.date <= selectedDate);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ files: filteredFiles }));
+        });
+    } else {
+        // Define the path to the HTML file
+        const filePath = path.join(__dirname, 'index.html');
+
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('500 Internal Server Error');
+                console.error('Error reading file:', err);
+                return;
+            }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data);
+        });
+    }
 });
 //.listen(8080); //the server object listens on port 8080
 
