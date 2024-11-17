@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Fetch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Upload and Fetch</h1>
+
+    <h2>Upload File</h2>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload</button>
+
+    <h2>Fetch File by Name</h2>
+    <input type="text" id="fileNameInput" placeholder="Enter file name" />
+    <button onclick="fetchFileByName()">Fetch File</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(result);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                document.getElementById('result').innerText = 'Error uploading file.';
+            }
+        }
+
+        async function fetchFileByName() {
+            const fileName = document.getElementById('fileNameInput').value;
+
+            if (!fileName) {
+                alert('Please enter a file name to fetch.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/fetch?name=${encodeURIComponent(fileName)}`);
+                const result = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(result);
+            } catch (error) {
+                console.error('Error fetching file:', error);
+                document.getElementById('result').innerText = 'Error fetching file.';
+            }
+        }
+    </script>
+</body>
+</html>
