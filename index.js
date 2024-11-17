@@ -81,25 +81,28 @@ async function fetchFileByName(fileName) {
   }
 }
 
-export default async function fetchData() {
-  console.log("fetch data!")
-  try {
-    const groups = await pinata.groups.list()
-    const group = groups.groups[0].id
-    const files = await pinata.files.list()//.group(group).metadata({
-    //   "date": "11/16/2024"
-    // })    
-    console.log(files.files)
-    // const date = new Date(files.files[0].created_at)
-    // console.log(date.toLocaleString())
-    // console.log(new Date())
-    // const data = await pinata.gateways.get(files.files[0].cid);
-    // console.log(data)
-    return files.files
+export default async function fetchData(selectedDate) {
+    console.log("fetch data!");
+    try {
+        const groups = await pinata.groups.list();
+        const group = groups.groups[0].id; // Assuming you want to use the first group
 
-  } catch (error) {
-    console.log(error);
-  }
+        // Fetch all files
+        const response = await pinata.files.list(); 
+        const allFiles = response.files;
+
+        // Filter files based on the selected date
+        const filteredFiles = allFiles.filter(file => {
+            // Compare the date in file.keyvalues.date with selectedDate
+            return new Date(file.keyvalues.date) < new Date(selectedDate);
+        });
+
+        console.log(filteredFiles); // Output the filtered files
+        return filteredFiles;
+
+    } catch (error) {
+        console.log("Error fetching files:", error);
+    }
 }
 
 async function getFiles() {

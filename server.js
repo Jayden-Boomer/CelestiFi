@@ -22,12 +22,12 @@ app.get('/', (req, res) => {
 });
 
 // Handle form submission
-app.post('/submit-date', (req, res) => {
-  const selectedDate = req.body.date;
-  console.log('Selected date:', selectedDate); // Log the submitted date
-  const files = fetchData();
-  filterFiles(selectedDate);
-  res.send(/*`Date received: ${selectedDate}`*/);
+app.post('/submit-date', async (req, res) => {
+    const selectedDate = new Date(req.body.date);
+    console.log('Selected date:', selectedDate);
+    const files = await fetchData(selectedDate); // Make sure to await if it's async
+    console.log("Files to send:", files); // Log files before sending
+    res.send(files); // Send the files back to the client
 });
 
 // Start the server
@@ -35,10 +35,6 @@ app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
 
-function filterFiles(selectedDate) {
-  const filteredFiles = files.filter(file => new Date(file.keyvalues.date) < selectedDate);
-  renderFiles(filteredFiles);
-}
 
 function renderFiles(files) {
   const resultsContainer = document.getElementById('response');
