@@ -3,76 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload and Fetch</title>
+    <title>Date Filter for Files</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        input[type="file"] {
-            margin-bottom: 10px;
+        #dateForm {
+            margin-bottom: 20px;
         }
-        button {
+        #results {
+            border: 1px solid #ccc;
+            padding: 10px;
             margin-top: 10px;
+            max-width: 400px;
+        }
+        .file-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .file-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
 <body>
-    <h1>File Upload and Fetch</h1>
 
-    <h2>Upload File</h2>
-    <input type="file" id="fileInput" />
-    <button onclick="uploadFile()">Upload</button>
+    <h1>File Date Filter</h1>
+    <form id="dateForm">
+        <label for="fileDate">Select a date:</label>
+        <input type="date" id="fileDate" name="fileDate" required />
+        <button type="submit">Search</button>
+    </form>
 
-    <h2>Fetch File by Name</h2>
-    <input type="text" id="fileNameInput" placeholder="Enter file name" />
-    <button onclick="fetchFileByName()">Fetch File</button>
-
-    <div id="result"></div>
+    <div id="results"></div>
 
     <script>
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
+        // Sample array of file objects with dates
+        const files = [
+            { name: 'File1.txt', date: new Date('2023-10-01') },
+            { name: 'File2.txt', date: new Date('2023-10-05') },
+            { name: 'File3.txt', date: new Date('2023-10-10') },
+            { name: 'File4.txt', date: new Date('2023-10-15') },
+            { name: 'File5.txt', date: new Date('2023-10-20') }
+        ];
 
-            if (!file) {
-                alert('Please select a file to upload.');
-                return;
-            }
+        document.getElementById('dateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const selectedDate = new Date(document.getElementById('fileDate').value);
+            displayFiles(selectedDate);
+        });
 
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                const result = await response.json();
-                document.getElementById('result').innerText = JSON.stringify(result);
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                document.getElementById('result').innerText = 'Error uploading file.';
-            }
+        function displayFiles(selectedDate) {
+            const filteredFiles = files.filter(file => file.date <= selectedDate);
+            renderFiles(filteredFiles);
         }
 
-        async function fetchFileByName() {
-            const fileName = document.getElementById('fileNameInput').value;
-
-            if (!fileName) {
-                alert('Please enter a file name to fetch.');
+        function renderFiles(files) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = ''; // Clear previous results
+            if (files.length === 0) {
+                resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
                 return;
             }
-
-            try {
-                const response = await fetch(`/fetch?name=${encodeURIComponent(fileName)}`);
-                const result = await response.json();
-                document.getElementById('result').innerText = JSON.stringify(result);
-            } catch (error) {
-                console.error('Error fetching file:', error);
-                document.getElementById('result').innerText = 'Error fetching file.';
-            }
+            files.forEach(file => {
+                const fileElement = document.createElement('div');
+                fileElement.classList.add('file-item');
+                fileElement.textContent = file.name;
+                resultsContainer.appendChild(fileElement);
+            });
         }
     </script>
 </body>
