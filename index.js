@@ -79,9 +79,6 @@ async function fetch() {
   }
 }
 
-
-// index.js
-
 export async function getFiles() {
     // Example of fetching files (this could be from a database, API, etc.)
     return [

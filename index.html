@@ -40,15 +40,23 @@
     <div id="results"></div>
 
     <script>
+        import {getFiles} from './index.js'
         // // Sample array of file objects with dates
         var files = [];
-        document.getElementById('dateForm').addEventListener('click', function(event) {
-            event.preventDefault();
-            files = getFiles();
-        });
+        //     { name: 'File 1', date: new Date('2023-01-01') },
+        //     { name: 'File 2', date: new Date('2023-02-01') },
+        //     { name: 'File 3', date: new Date('2023-03-01') },
+        // ];
+        // document.getElementById('dateForm').addEventListener('change', function(event) {
+        //     event.preventDefault();
+        //     files = getFiles();
+        //     console.log(files)
+        // });
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            files = getFiles();
+            console.log("Files:" + files)
             const selectedDate = new Date(document.getElementById('fileDate').value);
             displayFiles(selectedDate);
         });
