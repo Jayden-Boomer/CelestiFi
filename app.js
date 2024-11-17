@@ -12,7 +12,7 @@ const port = 8080;
 
 const server = createServer((req, res) => {
     // Define the path to the HTML file
-    const filePath = "index.html"//path.join(__dirname, 'index.html');
+    const filePath = "index2.html"//path.join(__dirname, 'index.html');
 
     fs.readFile(filePath, (err, data) => {
         if (err) {

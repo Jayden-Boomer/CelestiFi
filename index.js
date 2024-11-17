@@ -81,7 +81,8 @@ async function fetchFileByName(fileName) {
   }
 }
 
-async function fetch() {
+export default async function fetchData() {
+  console.log("fetch data!")
   try {
     const groups = await pinata.groups.list()
     const group = groups.groups[0].id
@@ -94,6 +95,7 @@ async function fetch() {
     // console.log(new Date())
     // const data = await pinata.gateways.get(files.files[0].cid);
     // console.log(data)
+    return files.files
 
   } catch (error) {
     console.log(error);
@@ -118,5 +120,5 @@ async function uploadFakes(){
 }
 // await uploadFakes();
 // await upload(file, 0, new Date);
-await fetch();
+// await fetch();
 // await fetchFileByName("Leave You Alone [Untitled_NFT].mp3")

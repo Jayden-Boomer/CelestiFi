@@ -44,25 +44,72 @@
     button:hover {
       background-color: #0056b3;
     }
+
+    #response {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e0ffe0;
+      border: 1px solid #5cb85c;
+      border-radius: 5px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h1>Date Picker Form</h1>
-  <form id="dateForm">
+  <form id="dateForm" action="/submit-date" method="POST">
     <label for="date">Select a date:</label>
     <input type="date" id="date" name="date" required>
-    <br><br>
+    <br>
     <button type="submit">Submit</button>
   </form>
 
+  <!-- Placeholder for response -->
+  <div id="response"></div>
+
   <script>
-    // Attach a submit event listener to the form
     const form = document.getElementById('dateForm');
-    form.addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent the form from actually submitting
-      const selectedDate = document.getElementById('date').value;
-      console.log('Selected date:', selectedDate);
+    const responseDiv = document.getElementById('response');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      const formData = new FormData(form);
+      const date = formData.get('date');
+
+      try {
+        // Send form data to the server
+        const response = await fetch('/submit-date', {
+          method: 'POST',
+          body: new URLSearchParams(formData),
+        });
+
+        const serverResponse = await response.text(); // Get the server's response
+        console.log('Server response:', serverResponse);
+
+        // Display the server's response in the #response div
+        responseDiv.style.display = 'block';
+        responseDiv.textContent = serverResponse;
+      } catch (error) {
+        console.error('Error submitting the date:', error);
+        responseDiv.style.display = 'block';
+        responseDiv.textContent = 'There was an error submitting your date.';
+      }
     });
+
+    function renderFiles(files) {
+        const resultsContainer = document.getElementById('response');
+        resultsContainer.innerHTML = ''; // Clear previous results
+        if (files.length === 0) {
+            resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
+            return;
+        }
+        files.forEach(file => {
+            const fileElement = document.createElement('div');
+            fileElement.classList.add('file-item');
+            fileElement.textContent = 'Name: ' + file.name + ', Date: '+ new Date(file.keyvalues.date).toLocaleString() +', Size:'+ file.size + ' bytes';
+            resultsContainer.appendChild(fileElement);
+        });
+    }
   </script>
 </body>
-</html>
