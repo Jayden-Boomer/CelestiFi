@@ -1,184 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CelestiFi</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #282828;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column; /* Align items in a column */
-        align-items: center; /* Center items horizontally */
-        margin-top: 20px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CelestiFi</title>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
         padding: 20px;
-        margin-right: 20px;
-        background: #2d024c;
-        border: 3px solid #37008b;
-        color: #eae0ff;
-        border-radius: 7px;
-        max-width: 300px;
-        margin-left: auto; /* Center form horizontally */
-        margin-right: auto; /* Center form horizontally */
-    }
+        background-color: #282828;
+        }
 
-    h1 {
-        color: #eae0ff; /* Keep your existing color */
-        text-align: center; /* Center the text */
-        font-size: 300%;
-    }
+        form {
+            display: flex;
+            flex-direction: column; /* Align items in a column */
+            align-items: center; /* Center items horizontally */
+            margin-top: 20px;
+            padding: 20px;
+            margin-right: 20px;
+            background: #2d024c;
+            border: 3px solid #37008b;
+            color: #eae0ff;
+            border-radius: 7px;
+            max-width: 300px;
+            margin-left: auto; /* Center form horizontally */
+            margin-right: auto; /* Center form horizontally */
+        }
 
-    label {
-      font-weight: bold;
-    }
+        h1 {
+            color: #eae0ff; /* Keep your existing color */
+            text-align: center; /* Center the text */
+            font-size: 300%;
+        }
 
-    input, button {
-      display: block;
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
+        label {
+        font-weight: bold;
+        }
 
-    button {
-      background-color: #a906c2;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+        input, button {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+        }
 
-    button:hover {
-      background-color: #730085;
-    }
+        button {
+        background-color: #a906c2;
+        color: white;
+        border: none;
+        cursor: pointer;
+        }
 
-    #response {
-      margin-top: 20px;
-      padding: 10px;
-      background: #eae0ff;
-      border: 1px solid #26144d;
-      border-radius: 5px;
-      display: none;
-    }
-  </style>
+        button:hover {
+        background-color: #730085;
+        }
+
+        #response {
+        margin-top: 20px;
+        padding: 10px;
+        background: #eae0ff;
+        border: 1px solid #26144d;
+        border-radius: 5px;
+        display: none;
+        }
+
+        canvas { display: block; }
+        #tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid black;
+            padding: 5px;
+            display: none;
+            pointer-events: none; /* Prevent mouse events on the tooltip */
+        }
+    </style>
 </head>
 <body>
-  <h1 style="color:#eae0ff">CelestiFi</h1>
-  <form id="dateForm" action="/submit-date" method="POST">
-    <label for="dateSlider">Select a date:</label>
-    <input type="range" id="dateSlider" name="date" min="0" max="0" step="0" value="0">
-    <input type="date" id="date" name="date" required>
-    <!-- <span id="selectedDate"></span> -->
-    <br>
-    <button type="submit">GO</button>
-  </form>
+    <h1 style="color:#eae0ff">CelestiFi</h1>
+    <form id="dateForm" action="/submit-date" method="POST">
+        <label for="dateSlider">Select a date:</label>
+        <input type="range" id="dateSlider" name="date" min="0" max="0" step="0" value="0">
+        <input type="date" id="date" name="date" required>
+        <!-- <span id="selectedDate"></span> -->
+        <br>
+        <button type="submit">GO</button>
+    </form>
 
-  <!-- Placeholder for response -->
-  <div id="response"></div>
+    <!-- Placeholder for response -->
+    <div id="response"></div>
 
-  <script>
-    const form = document.getElementById('dateForm');
-    const responseDiv = document.getElementById('response');
-    const dateSlider = document.getElementById('dateSlider');
-    // const selectedDateDisplay = document.getElementById('selectedDate');
-    const dateInput = document.getElementById('date');
+    <canvas id="pointCloudCanvas"></canvas>
+    <div id="tooltip"></div>
 
-    // Simulating the date of the first file from the database
-    const firstFileDate = new Date('12/31/2022'); // Example start date
-    const currentDate = new Date();
+    <script>
+        const form = document.getElementById('dateForm');
+        const responseDiv = document.getElementById('response');
+        const dateSlider = document.getElementById('dateSlider');
 
-    // Convert dates to timestamps
-    const minTimestamp = firstFileDate.getTime() - 1;
-    const maxTimestamp = currentDate.getTime() + 1;
+        const resultsContainer = document.getElementById('response');
+        const canvas = document.getElementById('pointCloudCanvas');
+        const tooltip = document.getElementById('tooltip');
 
-    // Set the slider attributes
-    dateSlider.min = minTimestamp;
-    dateSlider.max = maxTimestamp;
-    dateSlider.value = minTimestamp;
-    dateSlider.step = 1; // Set step to 1 for precise control
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    // Function to format the timestamp as a readable date
-    function formatDate(timestamp) {
-        const date = new Date(parseInt(timestamp));
-        return date.toLocaleDateString();
-    }
+        // const selectedDateDisplay = document.getElementById('selectedDate');
+        const dateInput = document.getElementById('date');
 
-    // Update the displayed date based on the slider value
-    function updateDateDisplay() {
-        const dateValue = new Date(parseInt(dateSlider.value)); // Convert slider value to date
-        // selectedDateDisplay.textContent = dateValue.toLocaleDateString(); // Display the date in a readable format
-        dateInput.value = dateValue.toISOString().split('T')[0]; // Update date input value
-    }
+        // Simulating the date of the first file from the database
+        const firstFileDate = new Date('12/31/2022'); // Example start date
+        const currentDate = new Date();
 
-    // Initialize the date display
-    updateDateDisplay();
+        // Convert dates to timestamps
+        const minTimestamp = firstFileDate.getTime() - 1;
+        const maxTimestamp = currentDate.getTime() + 1;
 
-    // Event listener for slider input
-    dateSlider.addEventListener('input', updateDateDisplay);
+        // Set the slider attributes
+        dateSlider.min = minTimestamp;
+        dateSlider.max = maxTimestamp;
+        dateSlider.value = minTimestamp;
+        dateSlider.step = 1; // Set step to 1 for precise control
 
-    // Event listener for date input change
-    dateInput.addEventListener('input', function() {
-        const selectedDate = new Date(dateInput.value); // Get the date from input
-        dateSlider.value = selectedDate.getTime(); // Update slider value
-        updateDateDisplay(); // Update the display
-    });
+        // Function to format the timestamp as a readable date
+        function formatDate(timestamp) {
+            const date = new Date(parseInt(timestamp));
+            return date.toLocaleDateString();
+        }
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        // Update the displayed date based on the slider value
+        function updateDateDisplay() {
+            const dateValue = new Date(parseInt(dateSlider.value)); // Convert slider value to date
+            // selectedDateDisplay.textContent = dateValue.toLocaleDateString(); // Display the date in a readable format
+            dateInput.value = dateValue.toISOString().split('T')[0]; // Update date input value
+        }
 
-        const selectedDate = new Date(parseInt(dateSlider.value)); // Get the selected date from the slider
+        // Initialize the date display
+        updateDateDisplay();
 
-        try {
-            // Send form data to the server
-            const response = await fetch('/submit-date', {
-                method: 'POST',
-                body: new URLSearchParams({ date: selectedDate.toISOString() }), // Send the date in ISO format
+        // Event listener for slider input
+        dateSlider.addEventListener('input', updateDateDisplay);
+
+        // Event listener for date input change
+        dateInput.addEventListener('input', function() {
+            const selectedDate = new Date(dateInput.value); // Get the date from input
+            dateSlider.value = selectedDate.getTime(); // Update slider value
+            updateDateDisplay(); // Update the display
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const selectedDate = new Date(parseInt(dateSlider.value)); // Get the selected date from the slider
+
+            try {
+                // Send form data to the server
+                const response = await fetch('/submit-date', {
+                    method: 'POST',
+                    body: new URLSearchParams({ date: selectedDate.toISOString() }), // Send the date in ISO format
+                });
+
+                const files = await response.json(); // Get the server's response
+                console.log('Server response:', files);
+
+                // Display the server's response in the #response div
+                responseDiv.style.display = 'block';
+                renderFiles(files);
+            } catch (error) {
+                console.error('Error submitting the date:', error);
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = 'There was an error submitting your date.';
+            }
+        });
+
+        function renderFiles(files) {
+            resultsContainer.innerHTML = ''; // Clear previous results
+            if (files.length === 0) {
+                resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
+                return;
+            }
+            
+            try {
+                drawPoints(files);
+            }
+            catch (error) {
+                responseDiv.textContent = 'There was an error rendering the point cloud';
+                files.forEach(file => {
+                    const fileElement = document.createElement('div');
+                    fileElement.classList.add('file-item');
+                    fileElement.textContent = 'Name:  ' + file.name + ', Date:  '+ formatDate(file.keyvalues.date) +', Size:  '+ formatFileSize(file.size);
+                    resultsContainer.appendChild(fileElement);
+                });
+            }
+        }
+
+        // Draw points
+        function drawPoints(files) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            files.forEach(file => {
+                ctx.fillStyle = 'rgba(0, 150, 255, 0.7)'; // Point color
+                ctx.beginPath();
+                ctx.arc(file.position.x, file.position.y, 5, 0, Math.PI * 2); // Draw point
+                ctx.fill();
+            });
+        }
+
+        // Show tooltip on hover
+        canvas.addEventListener('mousemove', (event) => {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            let found = false;
+
+            files.forEach(file => {
+                const dx = mouseX - file.position.x;
+                const dy = mouseY - file.position.y;
+                if (Math.sqrt(dx * dx + dy * dy) < 5) { // Check if mouse is near the point
+                    tooltip.innerHTML = `Name: ${file.name}<br>Creator: `;//${file.creator}
+                    tooltip.style.left = `${mouseX + 10}px`;
+                    tooltip.style.top = `${mouseY + 10}px`;
+                    tooltip.style.display = 'block';
+                    found = true;
+                }
             });
 
-            const files = await response.json(); // Get the server's response
-            console.log('Server response:', files);
-
-            // Display the server's response in the #response div
-            responseDiv.style.display = 'block';
-            renderFiles(files);
-        } catch (error) {
-            console.error('Error submitting the date:', error);
-            responseDiv.style.display = 'block';
-            responseDiv.textContent = 'There was an error submitting your date.';
-        }
-    });
-
-    function renderFiles(files) {
-        const resultsContainer = document.getElementById('response');
-        resultsContainer.innerHTML = ''; // Clear previous results
-        if (files.length === 0) {
-            resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
-            return;
-        }
-        
-        files.forEach(file => {
-            const fileElement = document.createElement('div');
-            fileElement.classList.add('file-item');
-            fileElement.textContent = 'Name:  ' + file.name + ', Date:  '+ formatDate(file.keyvalues.date) +', Size:  '+ formatFileSize(file.size);
-            resultsContainer.appendChild(fileElement);
+            if (!found) {
+                tooltip.style.display = 'none'; // Hide tooltip if not hovering over a point
+            }
         });
-    }
 
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawPoints(); // Redraw points after resizing
+        });
 
-    function formatDate(date) {
-        return new Date(date).toLocaleString().split(',')[0]
-    }
-  </script>
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleString().split(',')[0]
+        }
+
+
+    </script>
 </body>
