@@ -6,9 +6,9 @@
     <title>CelestiFi</title>
     <style>
         body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        background-color: #282828;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #282828;
         }
 
         form {
@@ -34,40 +34,43 @@
         }
 
         label {
-        font-weight: bold;
+            font-weight: bold;
         }
 
         input, button {
-        display: block;
-        width: 100%;
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        font-size: 1em;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
         }
 
         button {
-        background-color: #a906c2;
-        color: white;
-        border: none;
-        cursor: pointer;
+            background-color: #a906c2;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
 
         button:hover {
-        background-color: #730085;
+            background-color: #730085;
         }
 
         #response {
-        margin-top: 20px;
-        padding: 10px;
-        background: #eae0ff;
-        border: 1px solid #26144d;
-        border-radius: 5px;
-        display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: #eae0ff;
+            border: 1px solid #26144d;
+            border-radius: 5px;
+            display: none;
         }
 
-        canvas { display: block; }
+        canvas { 
+            display: block;
+            background-color: white; 
+        }
         #tooltip {
             position: absolute;
             background-color: white;
@@ -89,20 +92,24 @@
         <button type="submit">GO</button>
     </form>
 
-    <!-- Placeholder for response -->
-    <div id="response"></div>
+    
+    <div id="results">
+        <div id="response"></div>
+        <canvas id="pointCloudCanvas"></canvas>
+        <div id="tooltip"></div>
+        <!-- Placeholder for response -->
+    </div>
 
-    <canvas id="pointCloudCanvas"></canvas>
-    <div id="tooltip"></div>
+    
 
     <script>
         const form = document.getElementById('dateForm');
         const responseDiv = document.getElementById('response');
         const dateSlider = document.getElementById('dateSlider');
 
-        const resultsContainer = document.getElementById('response');
         const canvas = document.getElementById('pointCloudCanvas');
         const tooltip = document.getElementById('tooltip');
+        const fileTypes = new Map();
 
         // Set canvas size
         canvas.width = window.innerWidth;
@@ -163,12 +170,17 @@
                     body: new URLSearchParams({ date: selectedDate.toISOString() }), // Send the date in ISO format
                 });
 
-                const files = await response.json(); // Get the server's response
-                console.log('Server response:', files);
-
-                // Display the server's response in the #response div
-                responseDiv.style.display = 'block';
-                renderFiles(files);
+                const data = await response.json(); // Get the server's response
+                console.log('Server response:', data);
+                
+                data.fileTypes.forEach(file => {
+                    const fileType = file.split('.').pop();
+                    fileTypes.set(fileType, (fileTypes.get(fileType) || fileTypes.size));
+                });
+                
+                
+                // console.log('File type registry:', fileTypeRegistry);
+                renderFiles(data.files);
             } catch (error) {
                 console.error('Error submitting the date:', error);
                 responseDiv.style.display = 'block';
@@ -177,22 +189,27 @@
         });
 
         function renderFiles(files) {
-            resultsContainer.innerHTML = ''; // Clear previous results
+            responseDiv.innerHTML = ''; // Clear previous results
             if (files.length === 0) {
-                resultsContainer.innerHTML = '<p>No files found for the selected date.</p>';
+                responseDiv.style.display = 'block';
+                responseDiv.innerHTML = '<p>No files found for the selected date.</p>';
                 return;
             }
             
             try {
+                responseDiv.style.display = 'none';
+                // responseDiv.innerHTML = '<canvas id="pointCloudCanvas"></canvas><div id="tooltip"></div>'; // Clear previous results
                 drawPoints(files);
             }
             catch (error) {
-                responseDiv.textContent = 'There was an error rendering the point cloud';
+                responseDiv.style.display = 'block';
+                var msg = 'There was an error rendering the point cloud: ' + error;
+                responseDiv.textContent = msg;
                 files.forEach(file => {
                     const fileElement = document.createElement('div');
                     fileElement.classList.add('file-item');
                     fileElement.textContent = 'Name:  ' + file.name + ', Date:  '+ formatDate(file.keyvalues.date) +', Size:  '+ formatFileSize(file.size);
-                    resultsContainer.appendChild(fileElement);
+                    responseDiv.appendChild(fileElement);
                 });
             }
         }
@@ -200,37 +217,115 @@
         // Draw points
         function drawPoints(files) {
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            const halfWidth = canvas.width/2;
+            const halfHeight = canvas.height/2;
+            
+            
+            //ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
             files.forEach(file => {
                 ctx.fillStyle = 'rgba(0, 150, 255, 0.7)'; // Point color
                 ctx.beginPath();
-                ctx.arc(file.position.x, file.position.y, 5, 0, Math.PI * 2); // Draw point
+                const point = hashFileToCoordinate(file);
+                const fileElement = document.createElement('div');
+                fileElement.classList.add('file-item');
+                fileElement.textContent = 'X:  ' + point.x + ', Y:  '+ point.y;
+                responseDiv.appendChild(fileElement);
+                ctx.arc(point.x+halfWidth, point.y+halfHeight, 5, 0, Math.PI * 2); // Draw point
                 ctx.fill();
+                // ctx.stroke();
             });
         }
 
-        // Show tooltip on hover
-        canvas.addEventListener('mousemove', (event) => {
-            const mouseX = event.clientX;
-            const mouseY = event.clientY;
-            let found = false;
+        
 
-            files.forEach(file => {
-                const dx = mouseX - file.position.x;
-                const dy = mouseY - file.position.y;
-                if (Math.sqrt(dx * dx + dy * dy) < 5) { // Check if mouse is near the point
-                    tooltip.innerHTML = `Name: ${file.name}<br>Creator: `;//${file.creator}
-                    tooltip.style.left = `${mouseX + 10}px`;
-                    tooltip.style.top = `${mouseY + 10}px`;
-                    tooltip.style.display = 'block';
-                    found = true;
-                }
-            });
-
-            if (!found) {
-                tooltip.style.display = 'none'; // Hide tooltip if not hovering over a point
+        function hashFileToCoordinate(file) {
+            const fileType = file.name.split('.').pop();
+            const fileTypeAsInt = fileTypes.get(fileType);
+            
+            if (fileTypeAsInt < 0 || fileTypeAsInt > fileTypes.size) {
+                throw new Error(`There was an error hashing the file type`);
             }
-        });
+
+            const ctx = canvas.getContext('2d');
+            const halfWidth = canvas.width/2;
+            const halfHeight = canvas.height/2;
+
+            // Calculate the angle for each vertex of the polygon
+            const angle = (2 * Math.PI) / fileTypes.size; // Angle between each point
+
+            // Calculate the radius (distance from the center)
+            const radius = halfWidth/4; // You can adjust this to scale the size of the polygon
+
+            // Calculate the coordinates based on the value
+            var x = radius * Math.cos(angle * (fileTypeAsInt));
+            var y = radius * Math.sin(angle * (fileTypeAsInt));
+
+            const randMax = 20;
+            const randMin = -20;
+            x = x + getRandomNumber(randMin, randMax);
+            y = y + getRandomNumber(randMin, randMax);
+            
+
+            return { x, y };
+        }
+
+        function getRandomNumber(min, max) {
+            // Generates a random number between min (inclusive) and max (exclusive)
+            return Math.random() * (max - min) + min; 
+        }
+
+        function hashIntegerToCoordinates(value, maxValue) {
+            if (value < 1 || value > maxValue) {
+                throw new Error(`Value must be between 1 and ${maxValue}`);
+            }
+
+            // Calculate the angle for each vertex of the polygon
+            const angle = (2 * Math.PI) / maxValue; // Angle between each point
+
+            // Calculate the radius (distance from the center)
+            const radius = 20; // You can adjust this to scale the size of the polygon
+
+            // Calculate the coordinates based on the value
+            const x = radius * Math.cos(angle * (value));
+            const y = radius * Math.sin(angle * (value));
+
+            return { x, y };
+        }
+
+        function getFileTypeAsInt(fileType) {
+            // if the given file type is not in the registry, register it
+            if (!fileTypeRegistry.has(fileType)) {
+                const values = fileTypeRegistry.values();
+                const lastValue = values[values.length - 1];
+                fileTypeRegistry.set(fileType, lastValue+1);
+                return lastValue+1;
+            }
+
+            return fileTypeRegistry.get(fileType);
+        }
+
+        // // Show tooltip on hover
+        // canvas.addEventListener('mousemove', (event) => {
+        //     const mouseX = event.clientX;
+        //     const mouseY = event.clientY;
+        //     let found = false;
+
+        //     files.forEach(file => {
+        //         const dx = mouseX - file.position.x;
+        //         const dy = mouseY - file.position.y;
+        //         if (Math.sqrt(dx * dx + dy * dy) < 5) { // Check if mouse is near the point
+        //             tooltip.innerHTML = `Name: ${file.name}<br>Creator: `;//${file.creator}
+        //             tooltip.style.left = `${mouseX + 10}px`;
+        //             tooltip.style.top = `${mouseY + 10}px`;
+        //             tooltip.style.display = 'block';
+        //             found = true;
+        //         }
+        //     });
+
+        //     if (!found) {
+        //         tooltip.style.display = 'none'; // Hide tooltip if not hovering over a point
+        //     }
+        // });
 
         // Resize canvas on window resize
         window.addEventListener('resize', () => {

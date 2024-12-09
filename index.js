@@ -86,7 +86,7 @@ export default async function fetchData(selectedDate) {
     try {
         const groups = await pinata.groups.list();
         const group = groups.groups[0].id; // Assuming you want to use the first group
-
+       
         // Fetch all files
         const response = await pinata.files.list(); 
         const allFiles = response.files;
@@ -119,7 +119,11 @@ export default async function fetchData(selectedDate) {
         });
 
         console.log(filteredFiles); // Output the filtered files
-        return filteredFiles;
+        const files = filteredFiles;
+
+        const fileTypes = Array.from(new Set(files.map(file => {return file.name.split('.').pop();})));
+        console.log(fileTypes);
+        return {files, groups, fileTypes};
 
     } catch (error) {
         console.log("Error fetching files:", error);

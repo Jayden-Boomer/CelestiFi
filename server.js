@@ -25,10 +25,11 @@ app.get('/', (req, res) => {
 app.post('/submit-date', async (req, res) => {
     const selectedDate = new Date(req.body.date);
     console.log('Selected date:', selectedDate);
-    const files = await fetchData(selectedDate); // Make sure to await if it's async
-    console.log("Files to send:", files); // Log files before sending
-    res.send(files); // Send the files back to the client
+    const data = await fetchData(selectedDate); // Make sure to await if it's async
+    console.log("Files to send:", data.files); // Log files before sending
+    res.send(data); // Send the files back to the client
 });
+
 
 // Start the server
 app.listen(PORT, () => {
