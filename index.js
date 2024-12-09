@@ -80,7 +80,6 @@ async function fetchFileByName(fileName) {
     // Handle error or retry logic as needed
   }
 }
-
 export default async function fetchData(selectedDate) {
     console.log("fetch data!");
     try {
@@ -120,9 +119,11 @@ export default async function fetchData(selectedDate) {
 
         console.log(filteredFiles); // Output the filtered files
         const files = filteredFiles;
-
+        
         const fileTypes = Array.from(new Set(files.map(file => {return file.name.split('.').pop();})));
+        
         console.log(fileTypes);
+
         return {files, groups, fileTypes};
 
     } catch (error) {
